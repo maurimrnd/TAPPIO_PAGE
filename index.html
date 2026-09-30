@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TAPPIO</title>
+    <title>Aroma & Café - Club de Fidelidad</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome para íconos -->
@@ -12,50 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <!--peticion json-->
-    <script>async function processRegistration(event) {
-  event.preventDefault();
-
-  // Verificamos que los elementos existan antes de leer su valor
-  const elNombre = document.getElementById('nombre');
-  const elTelefono = document.getElementById('telefono');
-  const elEmail = document.getElementById('email');
-  const elFecha = document.getElementById('fechaNacimiento');
-  const elSucursal = document.getElementById('sucursal');
-
-  if (!elNombre || !elTelefono || !elEmail || !elFecha || !elSucursal) {
-    console.error("Uno de los IDs del HTML no coincide con el JavaScript.");
-    alert("Error de configuración en el formulario. Revisa los IDs de los campos.");
-    return;
-  }
-
-  const payload = {
-    nombre: elNombre.value,
-    telefono: elTelefono.value,
-    email: elEmail.value,
-    fechaNacimiento: elFecha.value,
-    sucursal: elSucursal.value,
-    fechaRegistro: new Date().toISOString()
-  };
-
-  try {
-    const response = await fetch('/.netlify/functions/registrar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (response.ok) {
-      document.getElementById('formCard').style.display = 'none';
-      document.getElementById('successCard').style.display = 'block';
-    } else {
-      alert("Ocurrió un error al procesar el registro.");
-    }
-  } catch (err) {
-    console.error("Error al conectar:", err);
-    alert("Error de conexión al servidor.");
-  }
-}</script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -119,22 +76,18 @@
         </div>
     </header>
 
-    <!-- BARRA CONFIGURACIÓN MAKE WEBHOOK -->
-    
-
     <!-- CONTENIDO PRINCIPAL -->
     <main class="max-w-4xl mx-auto px-4 py-8 md:py-12 w-full flex-grow">
         
-        <!-- BARRA DE PROGRESO -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            <!-- COLUMNA IZQUIERDA/SUPERIOR: SIMULADOR DE TARJETA DIGITAL (LOYALTY PASS) -->
+            <!-- COLUMNA IZQUIERDA: SIMULADOR DE TARJETA DIGITAL -->
             <div class="lg:col-span-5 lg:sticky lg:top-8 order-1 lg:order-2">
                 <div class="text-center lg:text-left mb-3">
                     <h3 class="text-xs uppercase tracking-wider font-bold text-stone-500">Vista previa de tu pase digital</h3>
                 </div>
 
-                <!-- VISTA PREVIA TARJETA DIGITAL DE FIDELIZACIÓN (APPLE / GOOGLE WALLET STYLE) -->
+                <!-- TARJETA DIGITAL DE FIDELIZACIÓN -->
                 <div class="relative w-full max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-coffee-900 via-coffee-800 to-coffee-950 text-stone-100 p-6 border border-coffee-700/50 transform hover:scale-[1.01] transition-transform">
                     <div class="absolute inset-0 wallet-card-shine pointer-events-none"></div>
                     
@@ -175,7 +128,7 @@
                         </div>
                     </div>
 
-                    <!-- Código QR de la Tarjeta -->
+                    <!-- Código QR -->
                     <div class="flex items-center justify-between pt-2 border-t border-coffee-700/60">
                         <div class="space-y-0.5">
                             <span class="text-[9px] text-coffee-400 block font-mono" id="cardPassId">ID: #AC-2026-889</span>
@@ -199,7 +152,7 @@
                 </div>
             </div>
 
-            <!-- COLUMNA DERECHA: PASO 1 Y PASO 2 -->
+            <!-- COLUMNA DERECHA: FORMULARIO Y RESULTADO -->
             <div class="lg:col-span-7 order-2 lg:order-1">
                 <div class="bg-white rounded-2xl shadow-xl border border-stone-200/80 p-6 md:p-8 relative">
                     
@@ -230,7 +183,7 @@
                                 <span class="text-xs text-red-500 hidden mt-1" id="nameError">Por favor, ingresa tu nombre completo.</span>
                             </div>
 
-                            <!-- Teléfono Móvil con Código de País -->
+                            <!-- Teléfono Móvil -->
                             <div>
                                 <label for="phone" class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
                                     Teléfono Móvil / WhatsApp <span class="text-red-500">*</span>
@@ -320,10 +273,10 @@
                                 <span class="text-xs text-red-500 hidden mt-1 block" id="termsError">Debes aceptar los términos para continuar.</span>
                             </div>
 
-                            <!-- Botón de Envío con Spinner de Carga -->
+                            <!-- Botón de Envío -->
                             <div class="pt-4">
                                 <button type="submit" id="submitBtn" class="w-full py-4 px-6 bg-gradient-to-r from-coffee-800 via-coffee-700 to-coffee-900 hover:from-coffee-900 hover:to-coffee-950 text-amber-50 font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform active:scale-[0.99] flex items-center justify-center gap-2">
-                                    <span id="submitBtnText">Generar Mi Tarjeta y Enviar a Make</span>
+                                    <span id="submitBtnText">Generar Mi Tarjeta</span>
                                     <i id="submitBtnIcon" class="fa-solid fa-arrow-right text-gold-400"></i>
                                 </button>
                             </div>
@@ -331,24 +284,23 @@
                         </form>
                     </div>
 
-                    <!-- PASO 2: PANTALLA DE ÉXITO Y BOTONES DE WALLET -->
+                    <!-- PASO 2: PANTALLA DE ÉXITO Y WALLET -->
                     <div id="step2Content" class="hidden step-transition">
                         <div class="text-center space-y-3 mb-6">
                             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
                                 <i class="fa-solid fa-check-double"></i>
                             </div>
-                            <h2 class="font-serif text-2xl md:text-3xl font-bold text-coffee-950">¡Tarjeta Generada y Datos Enviados!</h2>
+                            <h2 class="font-serif text-2xl md:text-3xl font-bold text-coffee-950">¡Tarjeta Generada con Éxito!</h2>
                             <p class="text-stone-600 text-sm max-w-md mx-auto">
-                                Felicidades <strong id="successClientName" class="text-coffee-800"></strong>, tus datos han sido enviados exitosamente a Make y tu cuenta ha recibido <strong>100 Puntos de Bienvenida</strong>.
+                                Felicidades <strong id="successClientName" class="text-coffee-800"></strong>, tu registro se ha procesado y tu cuenta ha recibido <strong>100 Puntos de Bienvenida</strong>.
                             </p>
                         </div>
 
-                        <!-- CTA DESTACADO A APPLE & GOOGLE WALLET -->
+                        <!-- BOTONES APPLE & GOOGLE WALLET -->
                         <div class="bg-coffee-50 border border-coffee-200 rounded-2xl p-5 mb-6 space-y-4 text-center">
                             <p class="text-xs font-bold uppercase tracking-wider text-coffee-800">Guarda tu tarjeta digital ahora:</p>
                             
                             <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                                <!-- Botón Apple Wallet -->
                                 <button onclick="triggerWalletDownload('Apple Wallet')" 
                                     class="flex-1 py-3.5 px-5 bg-black hover:bg-stone-900 text-white font-medium text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-3 border border-stone-800 group">
                                     <i class="fa-brands fa-apple text-2xl group-hover:scale-110 transition-transform"></i>
@@ -358,7 +310,6 @@
                                     </div>
                                 </button>
 
-                                <!-- Botón Google Wallet -->
                                 <button onclick="triggerWalletDownload('Google Wallet')" 
                                     class="flex-1 py-3.5 px-5 bg-white hover:bg-stone-50 text-stone-900 font-medium text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-3 border border-stone-300 group">
                                     <i class="fa-brands fa-google text-xl text-blue-600 group-hover:scale-110 transition-transform"></i>
@@ -377,7 +328,6 @@
                             </div>
                         </div>
 
-                        <!-- INSTRUCCIONES RÁPIDAS -->
                         <div class="border-t border-stone-200 pt-5 space-y-2 text-xs text-stone-600">
                             <span class="font-bold text-stone-800 block">¿Cómo funciona en el local?</span>
                             <ul class="space-y-1.5 list-disc list-inside">
@@ -403,51 +353,30 @@
     <!-- FOOTER -->
     <footer class="text-center py-6 text-xs text-stone-500 bg-white border-t border-stone-200 mt-8">
         <p>© 2026 Aroma & Café Loyalty Program. Todos los derechos reservados.</p>
-        <p class="mt-1 text-[11px] text-stone-400">Apple Wallet y Google Wallet son marcas registradas de sus respectivos propietarios.</p>
     </footer>
 
-    <!-- LOGICA JS DE INTERACTIVIDAD, VALIDACIÓN Y CONEXIÓN CON MAKE -->
+    <!-- LÓGICA JAVASCRIPT -->
     <script>
-        // Cargar Webhook URL almacenada previamente si existe
         document.addEventListener('DOMContentLoaded', () => {
-            const savedUrl = localStorage.getItem('make_webhook_url');
-            if (savedUrl) {
-                document.getElementById('makeWebhookUrl').value = savedUrl;
-            }
-            // Generar ID único para la tarjeta simulada
             const randomId = 'AC-' + Math.floor(100000 + Math.random() * 900000);
             document.getElementById('cardPassId').textContent = 'ID: #' + randomId;
         });
 
-        // Guardar URL del webhook en LocalStorage
-        function saveWebhookUrl() {
-            const urlInput = document.getElementById('makeWebhookUrl').value.trim();
-            if (urlInput) {
-                localStorage.setItem('make_webhook_url', urlInput);
-                showNotification('URL del Webhook de Make guardada correctamente', 'success');
-            } else {
-                localStorage.removeItem('make_webhook_url');
-                showNotification('Se ha limpiado la URL del Webhook', 'info');
-            }
-        }
-
-        // Actualizar dinámicamente el nombre en la vista previa de la tarjeta
         function updateCardName(val) {
             const cardHolder = document.getElementById('cardHolderName');
-            if (val.trim() === '') {
+            if (!val || val.trim() === '') {
                 cardHolder.textContent = 'Tu Nombre Aquí';
             } else {
                 cardHolder.textContent = val;
             }
         }
 
-        // Validación y Procesamiento del Registro (Envío a Make -> Paso 2)
         async function processRegistration(e) {
             e.preventDefault();
 
             let isValid = true;
 
-            // Elementos y valores
+            // Elementos del DOM con IDs exactos
             const name = document.getElementById('fullName');
             const nameError = document.getElementById('nameError');
             const countryCode = document.getElementById('countryCode').value;
@@ -460,43 +389,42 @@
             const branch = document.getElementById('branch').value;
             const terms = document.getElementById('terms');
             const termsError = document.getElementById('termsError');
-            const webhookUrl = document.getElementById('makeWebhookUrl').value.trim();
 
-            // Validar Nombre
-            if (name.value.trim().length < 3) {
+            // Validación de Nombre
+            if (!name || name.value.trim().length < 3) {
                 nameError.classList.remove('hidden');
                 isValid = false;
             } else {
                 nameError.classList.add('hidden');
             }
 
-            // Validar Teléfono
-            if (phone.value.trim().length < 6) {
+            // Validación de Teléfono
+            if (!phone || phone.value.trim().length < 6) {
                 phoneError.classList.remove('hidden');
                 isValid = false;
             } else {
                 phoneError.classList.add('hidden');
             }
 
-            // Validar Email
+            // Validación de Email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email.value.trim())) {
+            if (!email || !emailRegex.test(email.value.trim())) {
                 emailError.classList.remove('hidden');
                 isValid = false;
             } else {
                 emailError.classList.add('hidden');
             }
 
-            // Validar Fecha de Nacimiento
-            if (!birthdate.value) {
+            // Validación de Fecha de Nacimiento
+            if (!birthdate || !birthdate.value) {
                 birthdateError.classList.remove('hidden');
                 isValid = false;
             } else {
                 birthdateError.classList.add('hidden');
             }
 
-            // Validar Términos
-            if (!terms.checked) {
+            // Validación de Términos
+            if (!terms || !terms.checked) {
                 termsError.classList.remove('hidden');
                 isValid = false;
             } else {
@@ -505,7 +433,7 @@
 
             if (!isValid) return;
 
-            // Preparar los datos a enviar
+            // Objeto JSON con los datos del usuario
             const payload = {
                 nombre: name.value.trim(),
                 telefono: `${countryCode} ${phone.value.trim()}`,
@@ -517,61 +445,44 @@
                 fechaRegistro: new Date().toISOString()
             };
 
-            // Cambiar botón a estado de carga
             setLoadingState(true);
 
-            if (webhookUrl) {
-                try {
-                    // Envío vía POST HTTP JSON a Make
-                    const response = await fetch(webhookUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
-                    });
+            try {
+                // Envío seguro a la Serverless Function de Netlify (sin exponer la URL de Make)
+                const response = await fetch('/.netlify/functions/registrar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-                    if (response.ok || response.status === 200 || response.status === 204) {
-                        showNotification('¡Datos enviados exitosamente a Make!', 'success');
-                    } else {
-                        console.warn('Respuesta no estándar del servidor:', response.status);
-                        showNotification('Formulario enviado (Servidor respondió con código ' + response.status + ')', 'info');
-                    }
-                } catch (error) {
-                    console.error('Error al enviar a Make:', error);
-                    showNotification('Error al conectar con Make. Se completará el flujo de todas formas.', 'warning');
+                if (response.ok) {
+                    showNotification('¡Registro procesado correctamente!', 'success');
+                } else {
+                    console.warn('El servidor respondió con un aviso:', response.status);
+                    showNotification('Procesado con observaciones.', 'info');
                 }
-            } else {
-                // Simulación si no ingresaron Webhook URL
-                showNotification('Simulando envío (Ingresa una URL de Make arriba para producción)', 'info');
-                await new Promise(resolve => setTimeout(resolve, 1200));
+            } catch (error) {
+                console.error('Error de red:', error);
+                showNotification('Continuando en modo fuera de línea.', 'warning');
             }
 
             setLoadingState(false);
 
-            // Transicionar al Paso 2 (Pantalla de Éxito)
+            // Redirección visual al Paso 2
             document.getElementById('successClientName').textContent = name.value.trim();
             const step1 = document.getElementById('step1Content');
             const step2 = document.getElementById('step2Content');
 
             step1.classList.add('opacity-0');
-            
             setTimeout(() => {
                 step1.classList.add('hidden');
                 step2.classList.remove('hidden');
                 setTimeout(() => {
                     step2.classList.remove('opacity-0');
                 }, 50);
-
-                // Actualizar barra de progreso e indicadores
-                document.getElementById('progressBar').style.width = '100%';
-                document.getElementById('stepIndicator1').className = 'text-stone-400 font-normal flex items-center gap-1.5';
-                document.getElementById('stepIndicator2').className = 'text-coffee-700 font-bold flex items-center gap-1.5';
-                document.getElementById('stepIndicator2').querySelector('span').className = 'w-5 h-5 rounded-full bg-coffee-700 text-white flex items-center justify-center text-[10px]';
             }, 300);
         }
 
-        // Manejador del estado visual de carga
         function setLoadingState(loading) {
             const submitBtn = document.getElementById('submitBtn');
             const btnText = document.getElementById('submitBtnText');
@@ -580,17 +491,16 @@
             if (loading) {
                 submitBtn.disabled = true;
                 submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
-                btnText.textContent = 'Enviando datos a Make...';
+                btnText.textContent = 'Procesando registro...';
                 btnIcon.className = 'fa-solid fa-spinner fa-spin text-gold-400';
             } else {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
-                btnText.textContent = 'Generar Mi Tarjeta y Enviar a Make';
+                btnText.textContent = 'Generar Mi Tarjeta';
                 btnIcon.className = 'fa-solid fa-arrow-right text-gold-400';
             }
         }
 
-        // Notificación flotante de confirmación/error
         function showNotification(message, type = 'info') {
             const toast = document.createElement('div');
             let icon = 'fa-circle-info text-blue-400';
@@ -602,22 +512,17 @@
             
             document.body.appendChild(toast);
 
-            setTimeout(() => {
-                toast.classList.remove('opacity-0', 'translate-y-2');
-            }, 50);
-
+            setTimeout(() => toast.classList.remove('opacity-0', 'translate-y-2'), 50);
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
 
-        // Simulación de interacción con botones de Wallet
         function triggerWalletDownload(walletType) {
             showNotification(`Generando pase para ${walletType}...`, 'info');
         }
 
-        // Reiniciar formulario para otro registro
         function resetForm() {
             document.getElementById('loyaltyForm').reset();
             updateCardName('');
@@ -635,11 +540,6 @@
                 setTimeout(() => {
                     step1.classList.remove('opacity-0');
                 }, 50);
-
-                document.getElementById('progressBar').style.width = '50%';
-                document.getElementById('stepIndicator1').className = 'text-coffee-700 font-bold flex items-center gap-1.5';
-                document.getElementById('stepIndicator2').className = 'text-stone-400 flex items-center gap-1.5';
-                document.getElementById('stepIndicator2').querySelector('span').className = 'w-5 h-5 rounded-full bg-stone-300 text-stone-600 flex items-center justify-center text-[10px]';
             }, 300);
         }
     </script>
