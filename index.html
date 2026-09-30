@@ -28,7 +28,7 @@
 
     try {
       // Hacemos la llamada a la Serverless Function de Netlify
-      const response = await fetch('/netlify/functions/registrar.js', {
+      const response = await fetch('/.netlify/functions/registrar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
