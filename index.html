@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-stone-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aroma Club - Tu Tarjeta de Fidelidad Digital</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        coffee: {
+                            50: '#FAF6F0',
+                            100: '#F5EBE1',
+                            200: '#E6D3C1',
+                            300: '#D5B79F',
+                            400: '#C2987B',
+                            500: '#AD7856',
+                            600: '#8F5A3B',
+                            700: '#734127',
+                            800: '#582E19',
+                            900: '#3D1C0D',
+                            950: '#260F05',
+                        },
+                        gold: {
+                            400: '#F3C35B',
+                            500: '#D99F28',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .wallet-card-shine {
+            background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 60%);
+        }
+        .step-transition {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+    </style>
+</head>
+<body class="font-sans text-stone-800 antialiased min-h-full flex flex-col justify-between selection:bg-coffee-200 selection:text-coffee-900">
+
+    <!-- ENCABEZADO Y BRANDING -->
+    <header class="bg-coffee-950 text-stone-100 py-6 px-4 border-b border-coffee-800/50 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#d5b79f_1px,transparent_1px)] [background-size:12px_12px]"></div>
+        <div class="max-w-4xl mx-auto flex items-center justify-between relative z-10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-coffee-700 to-gold-500 flex items-center justify-center text-white shadow-md">
+                    <i class="fa-solid fa-mug-hot text-lg"></i>
+                </div>
+                <div>
+                    <span class="font-serif text-xl font-bold tracking-tight text-coffee-50 block leading-tight">Aroma & Café</span>
+                    <span class="text-[10px] uppercase tracking-widest text-gold-400 font-semibold">Club de Fidelidad</span>
+                </div>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 text-xs text-coffee-200 bg-coffee-900/80 px-3 py-1.5 rounded-full border border-coffee-800">
+                <i class="fa-solid fa-gift text-gold-400"></i>
+                <span>¡Regalo de bienvenida: <strong>100 Pts</strong>!</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- BARRA CONFIGURACIÓN MAKE WEBHOOK -->
+    <div class="bg-amber-100/80 border-b border-amber-300/60 px-4 py-3">
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-2 text-xs text-amber-950">
+            <div class="flex items-center gap-2 font-semibold">
+                <span class="bg-amber-600 text-white p-1.5 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-bolt text-xs"></i>
+                </span>
+                <span>Configuración Make (Integromat) Webhook:</span>
+            </div>
+            <div class="flex w-full md:w-auto items-center gap-2">
+                <input type="url" id="makeWebhookUrl" placeholder="https://hook.us2.make.com/4xyzmsqg3smztmx1dq68e2rbwh9f7qfu" 
+                    class="w-full md:w-80 px-3 py-1.5 rounded-lg border border-amber-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-coffee-600 shadow-sm">
+                <button type="button" onclick="saveWebhookUrl()" 
+                    class="bg-coffee-800 hover:bg-coffee-900 text-amber-50 px-3 py-1.5 rounded-lg font-bold text-xs shadow transition-all whitespace-nowrap">
+                    <i class="fa-solid fa-floppy-disk mr-1"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="max-w-4xl mx-auto px-4 py-8 md:py-12 w-full flex-grow">
+        
+        <!-- BARRA DE PROGRESO -->
+        <div class="max-w-md mx-auto mb-8">
+            <div class="flex items-center justify-between text-xs font-semibold mb-2">
+                <span id="stepIndicator1" class="text-coffee-700 font-bold flex items-center gap-1.5">
+                    <span class="w-5 h-5 rounded-full bg-coffee-700 text-white flex items-center justify-center text-[10px]">1</span> Datos del socio
+                </span>
+                <span id="stepIndicator2" class="text-stone-400 flex items-center gap-1.5">
+                    <span class="w-5 h-5 rounded-full bg-stone-300 text-stone-600 flex items-center justify-center text-[10px]">2</span> Guardar en Wallet
+                </span>
+            </div>
+            <div class="w-full bg-stone-200 h-2 rounded-full overflow-hidden">
+                <div id="progressBar" class="bg-gradient-to-r from-coffee-600 to-gold-500 h-full w-1/2 transition-all duration-500"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- COLUMNA IZQUIERDA/SUPERIOR: SIMULADOR DE TARJETA DIGITAL (LOYALTY PASS) -->
+            <div class="lg:col-span-5 lg:sticky lg:top-8 order-1 lg:order-2">
+                <div class="text-center lg:text-left mb-3">
+                    <h3 class="text-xs uppercase tracking-wider font-bold text-stone-500">Vista previa de tu pase digital</h3>
+                </div>
+
+                <!-- VISTA PREVIA TARJETA DIGITAL DE FIDELIZACIÓN (APPLE / GOOGLE WALLET STYLE) -->
+                <div class="relative w-full max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-coffee-900 via-coffee-800 to-coffee-950 text-stone-100 p-6 border border-coffee-700/50 transform hover:scale-[1.01] transition-transform">
+                    <div class="absolute inset-0 wallet-card-shine pointer-events-none"></div>
+                    
+                    <!-- Header Tarjeta -->
+                    <div class="flex justify-between items-start mb-6 border-b border-coffee-700/60 pb-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-mug-hot text-gold-400 text-sm"></i>
+                                <span class="font-serif font-bold text-base tracking-wide text-amber-50">AROMA & CAFÉ</span>
+                            </div>
+                            <span class="text-[10px] text-coffee-300 tracking-wider uppercase block mt-0.5">Membresía VIP</span>
+                        </div>
+                        <span class="bg-gold-500/20 border border-gold-400/40 text-gold-400 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                            Pase Digital
+                        </span>
+                    </div>
+
+                    <!-- Datos Dinámicos del Cliente -->
+                    <div class="space-y-4 mb-6">
+                        <div>
+                            <span class="text-[10px] text-coffee-300 uppercase tracking-widest block font-medium">Titular de la tarjeta</span>
+                            <span id="cardHolderName" class="font-semibold text-lg text-amber-100 truncate block">
+                                Tu Nombre Aquí
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 bg-coffee-950/60 p-3 rounded-xl border border-coffee-800/80">
+                            <div>
+                                <span class="text-[9px] text-coffee-300 uppercase tracking-wider block">Puntos Iniciales</span>
+                                <span class="text-xl font-bold text-gold-400 flex items-center gap-1">
+                                    <i class="fa-solid fa-star text-xs"></i> 100 Pts
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] text-coffee-300 uppercase tracking-wider block">Nivel</span>
+                                <span class="text-sm font-semibold text-stone-200 mt-1 block">Socio Bronce</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Código QR de la Tarjeta -->
+                    <div class="flex items-center justify-between pt-2 border-t border-coffee-700/60">
+                        <div class="space-y-0.5">
+                            <span class="text-[9px] text-coffee-400 block font-mono" id="cardPassId">ID: #AC-2026-889</span>
+                            <span class="text-[10px] text-coffee-200 flex items-center gap-1">
+                                <i class="fa-brands fa-apple text-xs"></i>
+                                <i class="fa-brands fa-google-pay text-xs"></i>
+                                Compatible con Wallet
+                            </span>
+                        </div>
+                        <div class="bg-white p-1.5 rounded-lg shadow-inner">
+                            <i class="fa-solid fa-qrcode text-3xl text-stone-900"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <span class="text-xs text-stone-500 flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved text-coffee-600"></i>
+                        Sin aplicaciones adicionales. Integrado con tu smartphone.
+                    </span>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: PASO 1 Y PASO 2 -->
+            <div class="lg:col-span-7 order-2 lg:order-1">
+                <div class="bg-white rounded-2xl shadow-xl border border-stone-200/80 p-6 md:p-8 relative">
+                    
+                    <!-- PASO 1: FORMULARIO DE REGISTRO -->
+                    <div id="step1Content" class="step-transition">
+                        <div class="mb-6">
+                            <h1 class="font-serif text-2xl md:text-3xl font-bold text-coffee-950">Obtén tu Tarjeta de Fidelidad</h1>
+                            <p class="text-stone-600 text-sm mt-1">
+                                Completa tus datos en menos de 1 minuto y recibe <strong>100 puntos gratis</strong> en tu pase digital.
+                            </p>
+                        </div>
+
+                        <form id="loyaltyForm" onsubmit="processRegistration(event)" class="space-y-4" novalidate>
+                            
+                            <!-- Nombre Completo -->
+                            <div>
+                                <label for="fullName" class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
+                                    Nombre Completo <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                                        <i class="fa-solid fa-user text-sm"></i>
+                                    </div>
+                                    <input type="text" id="fullName" required placeholder="Ej. Camila Silva" 
+                                        oninput="updateCardName(this.value)"
+                                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-coffee-600 focus:border-coffee-600 outline-none transition text-sm text-stone-800">
+                                </div>
+                                <span class="text-xs text-red-500 hidden mt-1" id="nameError">Por favor, ingresa tu nombre completo.</span>
+                            </div>
+
+                            <!-- Teléfono Móvil con Código de País -->
+                            <div>
+                                <label for="phone" class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
+                                    Teléfono Móvil / WhatsApp <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex gap-2">
+                                    <select id="countryCode" class="w-28 px-2 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-coffee-600 focus:border-coffee-600 outline-none transition text-xs font-medium bg-stone-50 text-stone-700">
+                                        <option value="+54">+54 (AR)</option>
+                                        <option value="+56">+56 (CL)</option>
+                                        <option value="+57">+57 (CO)</option>
+                                        <option value="+52">+52 (MX)</option>
+                                        <option value="+34">+34 (ES)</option>
+                                        <option value="+1">+1 (US/CA)</option>
+                                        <option value="+598">+598 (UY)</option>
+                                    </select>
+                                    <div class="relative flex-1">
+                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                                            <i class="fa-solid fa-phone text-sm"></i>
+                                        </div>
+                                        <input type="tel" id="phone" required placeholder="11 2345 6789" 
+                                            class="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-coffee-600 focus:border-coffee-600 outline-none transition text-sm text-stone-800">
+                                    </div>
+                                </div>
+                                <span class="text-xs text-red-500 hidden mt-1" id="phoneError">Ingresa un número de teléfono válido.</span>
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label for="email" class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
+                                    Correo Electrónico <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                                        <i class="fa-solid fa-envelope text-sm"></i>
+                                    </div>
+                                    <input type="email" id="email" required placeholder="tuemail@ejemplo.com" 
+                                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-coffee-600 focus:border-coffee-600 outline-none transition text-sm text-stone-800">
+                                </div>
+                                <p class="text-[11px] text-stone-500 mt-1">Te enviaremos también un respaldo de tu pase a este correo.</p>
+                                <span class="text-xs text-red-500 hidden mt-1" id="emailError">Ingresa un e-mail válido.</span>
+                            </div>
+
+                            <!-- Fecha de Nacimiento -->
+                            <div>
+                                <label for="birthdate" class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
+                                    Fecha de Nacimiento <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                                        <i class="fa-solid fa-cake-candles text-sm"></i>
+                                    </div>
+                                    <input type="date" id="birthdate" required 
+                                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-coffee-600 focus:border-coffee-600 outline-none transition text-sm text-stone-800">
+                                </div>
+                                <p class="text-[11px] text-amber-700 font-medium mt-1 flex items-center gap-1">
+                                    <i class="fa-solid fa-gift text-xs"></i> ¡Recibe una bebida gratis el día de tu cumpleaños!
+                                </p>
+                                <span class="text-xs text-red-500 hidden mt-1" id="birthdateError">Selecciona tu fecha de nacimiento.</span>
+                            </div>
+
+                            <!-- Sucursal Habitual -->
+                            <div>
+                                <label for="branch" class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">
+                                    Sucursal Habitual <span class="text-stone-400 font-normal">(Opcional)</span>
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                                        <i class="fa-solid fa-store text-sm"></i>
+                                    </div>
+                                    <select id="branch" class="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-coffee-600 focus:border-coffee-600 outline-none transition text-sm text-stone-800 bg-white">
+                                        <option value="Sucursal Principal" selected>Sucursal Principal</option>
+                                        <option value="Centro Histórico">Centro Histórico</option>
+                                        <option value="Palermo / Providencia">Palermo / Providencia</option>
+                                        <option value="Zona Norte / Shopping">Zona Norte / Shopping</option>
+                                        <option value="Sucursal Marina">Sucursal Marina</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Términos y Condiciones -->
+                            <div class="pt-2">
+                                <label class="flex items-start gap-3 cursor-pointer group">
+                                    <input type="checkbox" id="terms" required class="mt-1 w-4 h-4 rounded text-coffee-700 focus:ring-coffee-600 border-stone-300 cursor-pointer">
+                                    <span class="text-xs text-stone-600 leading-relaxed">
+                                        Acepto los <a href="#" class="text-coffee-700 underline font-semibold hover:text-coffee-900">Términos y Condiciones</a> del Club de Fidelidad y autorizo la <a href="#" class="text-coffee-700 underline font-semibold hover:text-coffee-900">Política de Privacidad</a> para la emisión de la tarjeta digital.
+                                    </span>
+                                </label>
+                                <span class="text-xs text-red-500 hidden mt-1 block" id="termsError">Debes aceptar los términos para continuar.</span>
+                            </div>
+
+                            <!-- Botón de Envío con Spinner de Carga -->
+                            <div class="pt-4">
+                                <button type="submit" id="submitBtn" class="w-full py-4 px-6 bg-gradient-to-r from-coffee-800 via-coffee-700 to-coffee-900 hover:from-coffee-900 hover:to-coffee-950 text-amber-50 font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform active:scale-[0.99] flex items-center justify-center gap-2">
+                                    <span id="submitBtnText">Generar Mi Tarjeta y Enviar a Make</span>
+                                    <i id="submitBtnIcon" class="fa-solid fa-arrow-right text-gold-400"></i>
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+
+                    <!-- PASO 2: PANTALLA DE ÉXITO Y BOTONES DE WALLET -->
+                    <div id="step2Content" class="hidden step-transition">
+                        <div class="text-center space-y-3 mb-6">
+                            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">
+                                <i class="fa-solid fa-check-double"></i>
+                            </div>
+                            <h2 class="font-serif text-2xl md:text-3xl font-bold text-coffee-950">¡Tarjeta Generada y Datos Enviados!</h2>
+                            <p class="text-stone-600 text-sm max-w-md mx-auto">
+                                Felicidades <strong id="successClientName" class="text-coffee-800"></strong>, tus datos han sido enviados exitosamente a Make y tu cuenta ha recibido <strong>100 Puntos de Bienvenida</strong>.
+                            </p>
+                        </div>
+
+                        <!-- CTA DESTACADO A APPLE & GOOGLE WALLET -->
+                        <div class="bg-coffee-50 border border-coffee-200 rounded-2xl p-5 mb-6 space-y-4 text-center">
+                            <p class="text-xs font-bold uppercase tracking-wider text-coffee-800">Guarda tu tarjeta digital ahora:</p>
+                            
+                            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                                <!-- Botón Apple Wallet -->
+                                <button onclick="triggerWalletDownload('Apple Wallet')" 
+                                    class="flex-1 py-3.5 px-5 bg-black hover:bg-stone-900 text-white font-medium text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-3 border border-stone-800 group">
+                                    <i class="fa-brands fa-apple text-2xl group-hover:scale-110 transition-transform"></i>
+                                    <div class="text-left leading-tight">
+                                        <span class="text-[10px] text-stone-400 block uppercase">Añadir a</span>
+                                        <span class="font-semibold text-sm">Apple Wallet</span>
+                                    </div>
+                                </button>
+
+                                <!-- Botón Google Wallet -->
+                                <button onclick="triggerWalletDownload('Google Wallet')" 
+                                    class="flex-1 py-3.5 px-5 bg-white hover:bg-stone-50 text-stone-900 font-medium text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-3 border border-stone-300 group">
+                                    <i class="fa-brands fa-google text-xl text-blue-600 group-hover:scale-110 transition-transform"></i>
+                                    <div class="text-left leading-tight">
+                                        <span class="text-[10px] text-stone-500 block uppercase">Añadir a</span>
+                                        <span class="font-semibold text-sm text-stone-800">Google Wallet</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <div class="text-center pt-2">
+                                <span class="text-[11px] text-stone-500">
+                                    <i class="fa-solid fa-envelope text-coffee-600 mr-1"></i>
+                                    Enlace de respaldo enviado también a tu e-mail.
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- INSTRUCCIONES RÁPIDAS -->
+                        <div class="border-t border-stone-200 pt-5 space-y-2 text-xs text-stone-600">
+                            <span class="font-bold text-stone-800 block">¿Cómo funciona en el local?</span>
+                            <ul class="space-y-1.5 list-disc list-inside">
+                                <li>Abre tu aplicación <strong>Wallet</strong> antes de pagar.</li>
+                                <li>Muestra tu código QR al barista para acumular puntos por cada consumo.</li>
+                                <li>¡Canjea tus puntos acumulados por bebidas y repostería gratis!</li>
+                            </ul>
+                        </div>
+
+                        <div class="mt-6 pt-4 text-center">
+                            <button onclick="resetForm()" class="text-xs text-coffee-700 font-semibold hover:underline">
+                                ← Registrar otro cliente
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-center py-6 text-xs text-stone-500 bg-white border-t border-stone-200 mt-8">
+        <p>© 2026 Aroma & Café Loyalty Program. Todos los derechos reservados.</p>
+        <p class="mt-1 text-[11px] text-stone-400">Apple Wallet y Google Wallet son marcas registradas de sus respectivos propietarios.</p>
+    </footer>
+
+    <!-- LOGICA JS DE INTERACTIVIDAD, VALIDACIÓN Y CONEXIÓN CON MAKE -->
+    <script>
+        // Cargar Webhook URL almacenada previamente si existe
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUrl = localStorage.getItem('make_webhook_url');
+            if (savedUrl) {
+                document.getElementById('makeWebhookUrl').value = savedUrl;
+            }
+            // Generar ID único para la tarjeta simulada
+            const randomId = 'AC-' + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('cardPassId').textContent = 'ID: #' + randomId;
+        });
+
+        // Guardar URL del webhook en LocalStorage
+        function saveWebhookUrl() {
+            const urlInput = document.getElementById('makeWebhookUrl').value.trim();
+            if (urlInput) {
+                localStorage.setItem('make_webhook_url', urlInput);
+                showNotification('URL del Webhook de Make guardada correctamente', 'success');
+            } else {
+                localStorage.removeItem('make_webhook_url');
+                showNotification('Se ha limpiado la URL del Webhook', 'info');
+            }
+        }
+
+        // Actualizar dinámicamente el nombre en la vista previa de la tarjeta
+        function updateCardName(val) {
+            const cardHolder = document.getElementById('cardHolderName');
+            if (val.trim() === '') {
+                cardHolder.textContent = 'Tu Nombre Aquí';
+            } else {
+                cardHolder.textContent = val;
+            }
+        }
+
+        // Validación y Procesamiento del Registro (Envío a Make -> Paso 2)
+        async function processRegistration(e) {
+            e.preventDefault();
+
+            let isValid = true;
+
+            // Elementos y valores
+            const name = document.getElementById('fullName');
+            const nameError = document.getElementById('nameError');
+            const countryCode = document.getElementById('countryCode').value;
+            const phone = document.getElementById('phone');
+            const phoneError = document.getElementById('phoneError');
+            const email = document.getElementById('email');
+            const emailError = document.getElementById('emailError');
+            const birthdate = document.getElementById('birthdate');
+            const birthdateError = document.getElementById('birthdateError');
+            const branch = document.getElementById('branch').value;
+            const terms = document.getElementById('terms');
+            const termsError = document.getElementById('termsError');
+            const webhookUrl = document.getElementById('makeWebhookUrl').value.trim();
+
+            // Validar Nombre
+            if (name.value.trim().length < 3) {
+                nameError.classList.remove('hidden');
+                isValid = false;
+            } else {
+                nameError.classList.add('hidden');
+            }
+
+            // Validar Teléfono
+            if (phone.value.trim().length < 6) {
+                phoneError.classList.remove('hidden');
+                isValid = false;
+            } else {
+                phoneError.classList.add('hidden');
+            }
+
+            // Validar Email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value.trim())) {
+                emailError.classList.remove('hidden');
+                isValid = false;
+            } else {
+                emailError.classList.add('hidden');
+            }
+
+            // Validar Fecha de Nacimiento
+            if (!birthdate.value) {
+                birthdateError.classList.remove('hidden');
+                isValid = false;
+            } else {
+                birthdateError.classList.add('hidden');
+            }
+
+            // Validar Términos
+            if (!terms.checked) {
+                termsError.classList.remove('hidden');
+                isValid = false;
+            } else {
+                termsError.classList.add('hidden');
+            }
+
+            if (!isValid) return;
+
+            // Preparar los datos a enviar
+            const payload = {
+                nombre: name.value.trim(),
+                telefono: `${countryCode} ${phone.value.trim()}`,
+                email: email.value.trim(),
+                fechaNacimiento: birthdate.value,
+                sucursal: branch || 'Sin especificar',
+                puntosIniciales: 100,
+                idTarjeta: document.getElementById('cardPassId').textContent.replace('ID: #', ''),
+                fechaRegistro: new Date().toISOString()
+            };
+
+            // Cambiar botón a estado de carga
+            setLoadingState(true);
+
+            if (webhookUrl) {
+                try {
+                    // Envío vía POST HTTP JSON a Make
+                    const response = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok || response.status === 200 || response.status === 204) {
+                        showNotification('¡Datos enviados exitosamente a Make!', 'success');
+                    } else {
+                        console.warn('Respuesta no estándar del servidor:', response.status);
+                        showNotification('Formulario enviado (Servidor respondió con código ' + response.status + ')', 'info');
+                    }
+                } catch (error) {
+                    console.error('Error al enviar a Make:', error);
+                    showNotification('Error al conectar con Make. Se completará el flujo de todas formas.', 'warning');
+                }
+            } else {
+                // Simulación si no ingresaron Webhook URL
+                showNotification('Simulando envío (Ingresa una URL de Make arriba para producción)', 'info');
+                await new Promise(resolve => setTimeout(resolve, 1200));
+            }
+
+            setLoadingState(false);
+
+            // Transicionar al Paso 2 (Pantalla de Éxito)
+            document.getElementById('successClientName').textContent = name.value.trim();
+            const step1 = document.getElementById('step1Content');
+            const step2 = document.getElementById('step2Content');
+
+            step1.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                step1.classList.add('hidden');
+                step2.classList.remove('hidden');
+                setTimeout(() => {
+                    step2.classList.remove('opacity-0');
+                }, 50);
+
+                // Actualizar barra de progreso e indicadores
+                document.getElementById('progressBar').style.width = '100%';
+                document.getElementById('stepIndicator1').className = 'text-stone-400 font-normal flex items-center gap-1.5';
+                document.getElementById('stepIndicator2').className = 'text-coffee-700 font-bold flex items-center gap-1.5';
+                document.getElementById('stepIndicator2').querySelector('span').className = 'w-5 h-5 rounded-full bg-coffee-700 text-white flex items-center justify-center text-[10px]';
+            }, 300);
+        }
+
+        // Manejador del estado visual de carga
+        function setLoadingState(loading) {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('submitBtnText');
+            const btnIcon = document.getElementById('submitBtnIcon');
+
+            if (loading) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+                btnText.textContent = 'Enviando datos a Make...';
+                btnIcon.className = 'fa-solid fa-spinner fa-spin text-gold-400';
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+                btnText.textContent = 'Generar Mi Tarjeta y Enviar a Make';
+                btnIcon.className = 'fa-solid fa-arrow-right text-gold-400';
+            }
+        }
+
+        // Notificación flotante de confirmación/error
+        function showNotification(message, type = 'info') {
+            const toast = document.createElement('div');
+            let icon = 'fa-circle-info text-blue-400';
+            if (type === 'success') icon = 'fa-circle-check text-emerald-400';
+            if (type === 'warning') icon = 'fa-triangle-exclamation text-amber-400';
+
+            toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-coffee-950 text-white px-5 py-3 rounded-xl shadow-2xl z-50 text-xs font-semibold flex items-center gap-2.5 border border-gold-500/40 transition-all duration-300 opacity-0 translate-y-2';
+            toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i> ${message}`;
+            
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-2');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Simulación de interacción con botones de Wallet
+        function triggerWalletDownload(walletType) {
+            showNotification(`Generando pase para ${walletType}...`, 'info');
+        }
+
+        // Reiniciar formulario para otro registro
+        function resetForm() {
+            document.getElementById('loyaltyForm').reset();
+            updateCardName('');
+
+            const randomId = 'AC-' + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('cardPassId').textContent = 'ID: #' + randomId;
+
+            const step1 = document.getElementById('step1Content');
+            const step2 = document.getElementById('step2Content');
+
+            step2.classList.add('opacity-0');
+            setTimeout(() => {
+                step2.classList.add('hidden');
+                step1.classList.remove('hidden');
+                setTimeout(() => {
+                    step1.classList.remove('opacity-0');
+                }, 50);
+
+                document.getElementById('progressBar').style.width = '50%';
+                document.getElementById('stepIndicator1').className = 'text-coffee-700 font-bold flex items-center gap-1.5';
+                document.getElementById('stepIndicator2').className = 'text-stone-400 flex items-center gap-1.5';
+                document.getElementById('stepIndicator2').querySelector('span').className = 'w-5 h-5 rounded-full bg-stone-300 text-stone-600 flex items-center justify-center text-[10px]';
+            }, 300);
+        }
+    </script>
+</body>
+</html>
