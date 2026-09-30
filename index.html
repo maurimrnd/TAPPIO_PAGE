@@ -355,19 +355,18 @@
         <p>© 2026 Aroma & Café Loyalty Program. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- LÓGICA JAVASCRIPT -->
+    <!-- LÓGICA JAVASCRIPT CORREGIDA -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const randomId = 'AC-' + Math.floor(100000 + Math.random() * 900000);
-            document.getElementById('cardPassId').textContent = 'ID: #' + randomId;
+            const cardPassEl = document.getElementById('cardPassId');
+            if (cardPassEl) cardPassEl.textContent = 'ID: #' + randomId;
         });
 
         function updateCardName(val) {
             const cardHolder = document.getElementById('cardHolderName');
-            if (!val || val.trim() === '') {
-                cardHolder.textContent = 'Tu Nombre Aquí';
-            } else {
-                cardHolder.textContent = val;
+            if (cardHolder) {
+                cardHolder.textContent = (!val || val.trim() === '') ? 'Tu Nombre Aquí' : val;
             }
         }
 
@@ -376,79 +375,89 @@
 
             let isValid = true;
 
-            // Elementos del DOM con IDs exactos
-            const name = document.getElementById('fullName');
+            // 1. Captura segura de elementos HTML
+            const elName = document.getElementById('fullName');
+            const elCountryCode = document.getElementById('countryCode');
+            const elPhone = document.getElementById('phone');
+            const elEmail = document.getElementById('email');
+            const elBirthdate = document.getElementById('birthdate');
+            const elBranch = document.getElementById('branch');
+            const elTerms = document.getElementById('terms');
+
+            // Elementos de error
             const nameError = document.getElementById('nameError');
-            const countryCode = document.getElementById('countryCode').value;
-            const phone = document.getElementById('phone');
             const phoneError = document.getElementById('phoneError');
-            const email = document.getElementById('email');
             const emailError = document.getElementById('emailError');
-            const birthdate = document.getElementById('birthdate');
             const birthdateError = document.getElementById('birthdateError');
-            const branch = document.getElementById('branch').value;
-            const terms = document.getElementById('terms');
             const termsError = document.getElementById('termsError');
 
-            // Validación de Nombre
-            if (!name || name.value.trim().length < 3) {
-                nameError.classList.remove('hidden');
+            // 2. Extracción segura de valores sin riesgos de null
+            const valName = elName ? elName.value.trim() : '';
+            const valCountryCode = elCountryCode ? elCountryCode.value : '+54';
+            const valPhone = elPhone ? elPhone.value.trim() : '';
+            const valEmail = elEmail ? elEmail.value.trim() : '';
+            const valBirthdate = elBirthdate ? elBirthdate.value : '';
+            const valBranch = elBranch ? elBranch.value : 'Sin especificar';
+            const isTermsChecked = elTerms ? elTerms.checked : false;
+
+            // 3. Validaciones
+            if (valName.length < 3) {
+                if (nameError) nameError.classList.remove('hidden');
                 isValid = false;
-            } else {
+            } else if (nameError) {
                 nameError.classList.add('hidden');
             }
 
-            // Validación de Teléfono
-            if (!phone || phone.value.trim().length < 6) {
-                phoneError.classList.remove('hidden');
+            if (valPhone.length < 6) {
+                if (phoneError) phoneError.classList.remove('hidden');
                 isValid = false;
-            } else {
+            } else if (phoneError) {
                 phoneError.classList.add('hidden');
             }
 
-            // Validación de Email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email || !emailRegex.test(email.value.trim())) {
-                emailError.classList.remove('hidden');
+            if (!emailRegex.test(valEmail)) {
+                if (emailError) emailError.classList.remove('hidden');
                 isValid = false;
-            } else {
+            } else if (emailError) {
                 emailError.classList.add('hidden');
             }
 
-            // Validación de Fecha de Nacimiento
-            if (!birthdate || !birthdate.value) {
-                birthdateError.classList.remove('hidden');
+            if (!valBirthdate) {
+                if (birthdateError) birthdateError.classList.remove('hidden');
                 isValid = false;
-            } else {
+            } else if (birthdateError) {
                 birthdateError.classList.add('hidden');
             }
 
-            // Validación de Términos
-            if (!terms || !terms.checked) {
-                termsError.classList.remove('hidden');
+            if (!isTermsChecked) {
+                if (termsError) termsError.classList.remove('hidden');
                 isValid = false;
-            } else {
+            } else if (termsError) {
                 termsError.classList.add('hidden');
             }
 
             if (!isValid) return;
 
-            // Objeto JSON con los datos del usuario
+            // 4. Preparar Payload
+            const cardPassEl = document.getElementById('cardPassId');
+            const cardId = cardPassEl ? cardPassEl.textContent.replace('ID: #', '') : 'AC-000000';
+
             const payload = {
-                nombre: name.value.trim(),
-                telefono: `${countryCode} ${phone.value.trim()}`,
-                email: email.value.trim(),
-                fechaNacimiento: birthdate.value,
-                sucursal: branch || 'Sin especificar',
+                nombre: valName,
+                telefono: `${valCountryCode} ${valPhone}`,
+                email: valEmail,
+                fechaNacimiento: valBirthdate,
+                sucursal: valBranch,
                 puntosIniciales: 100,
-                idTarjeta: document.getElementById('cardPassId').textContent.replace('ID: #', ''),
+                idTarjeta: cardId,
                 fechaRegistro: new Date().toISOString()
             };
 
             setLoadingState(true);
 
             try {
-                // Envío seguro a la Serverless Function de Netlify (sin exponer la URL de Make)
+                // Envío a Netlify Serverless Function
                 const response = await fetch('/.netlify/functions/registrar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -458,7 +467,7 @@
                 if (response.ok) {
                     showNotification('¡Registro procesado correctamente!', 'success');
                 } else {
-                    console.warn('El servidor respondió con un aviso:', response.status);
+                    console.warn('Respuesta del servidor:', response.status);
                     showNotification('Procesado con observaciones.', 'info');
                 }
             } catch (error) {
@@ -468,19 +477,21 @@
 
             setLoadingState(false);
 
-            // Redirección visual al Paso 2
-            document.getElementById('successClientName').textContent = name.value.trim();
+            // Transición a la pantalla de éxito
+            const successNameEl = document.getElementById('successClientName');
+            if (successNameEl) successNameEl.textContent = valName;
+
             const step1 = document.getElementById('step1Content');
             const step2 = document.getElementById('step2Content');
 
-            step1.classList.add('opacity-0');
-            setTimeout(() => {
-                step1.classList.add('hidden');
-                step2.classList.remove('hidden');
+            if (step1 && step2) {
+                step1.classList.add('opacity-0');
                 setTimeout(() => {
-                    step2.classList.remove('opacity-0');
-                }, 50);
-            }, 300);
+                    step1.classList.add('hidden');
+                    step2.classList.remove('hidden');
+                    setTimeout(() => step2.classList.remove('opacity-0'), 50);
+                }, 300);
+            }
         }
 
         function setLoadingState(loading) {
@@ -488,16 +499,18 @@
             const btnText = document.getElementById('submitBtnText');
             const btnIcon = document.getElementById('submitBtnIcon');
 
+            if (!submitBtn) return;
+
             if (loading) {
                 submitBtn.disabled = true;
                 submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
-                btnText.textContent = 'Procesando registro...';
-                btnIcon.className = 'fa-solid fa-spinner fa-spin text-gold-400';
+                if (btnText) btnText.textContent = 'Procesando registro...';
+                if (btnIcon) btnIcon.className = 'fa-solid fa-spinner fa-spin text-gold-400';
             } else {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
-                btnText.textContent = 'Generar Mi Tarjeta';
-                btnIcon.className = 'fa-solid fa-arrow-right text-gold-400';
+                if (btnText) btnText.textContent = 'Generar Mi Tarjeta';
+                if (btnIcon) btnIcon.className = 'fa-solid fa-arrow-right text-gold-400';
             }
         }
 
@@ -524,23 +537,25 @@
         }
 
         function resetForm() {
-            document.getElementById('loyaltyForm').reset();
+            const form = document.getElementById('loyaltyForm');
+            if (form) form.reset();
             updateCardName('');
 
             const randomId = 'AC-' + Math.floor(100000 + Math.random() * 900000);
-            document.getElementById('cardPassId').textContent = 'ID: #' + randomId;
+            const cardPassEl = document.getElementById('cardPassId');
+            if (cardPassEl) cardPassEl.textContent = 'ID: #' + randomId;
 
             const step1 = document.getElementById('step1Content');
             const step2 = document.getElementById('step2Content');
 
-            step2.classList.add('opacity-0');
-            setTimeout(() => {
-                step2.classList.add('hidden');
-                step1.classList.remove('hidden');
+            if (step1 && step2) {
+                step2.classList.add('opacity-0');
                 setTimeout(() => {
-                    step1.classList.remove('opacity-0');
-                }, 50);
-            }, 300);
+                    step2.classList.add('hidden');
+                    step1.classList.remove('hidden');
+                    setTimeout(() => step1.classList.remove('opacity-0'), 50);
+                }, 300);
+            }
         }
     </script>
 </body>
