@@ -13,40 +13,49 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
     <!--peticion json-->
-    <script>
-  document.getElementById('loyaltyForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+    <script>async function processRegistration(event) {
+  event.preventDefault();
 
-    const payload = {
-      nombre: document.getElementById('nombre').value,
-      telefono: document.getElementById('telefono').value,
-      email: document.getElementById('email').value,
-      fechaNacimiento: document.getElementById('fechaNacimiento').value,
-      sucursal: document.getElementById('sucursal').value,
-      fechaRegistro: new Date().toISOString()
-    };
+  // Verificamos que los elementos existan antes de leer su valor
+  const elNombre = document.getElementById('nombre');
+  const elTelefono = document.getElementById('telefono');
+  const elEmail = document.getElementById('email');
+  const elFecha = document.getElementById('fechaNacimiento');
+  const elSucursal = document.getElementById('sucursal');
 
-    try {
-      // Hacemos la llamada a la Serverless Function de Netlify
-      const response = await fetch('/.netlify/functions/registrar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+  if (!elNombre || !elTelefono || !elEmail || !elFecha || !elSucursal) {
+    console.error("Uno de los IDs del HTML no coincide con el JavaScript.");
+    alert("Error de configuración en el formulario. Revisa los IDs de los campos.");
+    return;
+  }
 
-      if (response.ok) {
-        // Redirigir o mostrar pantalla de éxito (Apple/Google Wallet)
-        document.getElementById('formCard').style.display = 'none';
-        document.getElementById('successCard').style.display = 'block';
-      } else {
-        alert("Ocurrió un error al procesar tu registro.");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error de conexión.");
+  const payload = {
+    nombre: elNombre.value,
+    telefono: elTelefono.value,
+    email: elEmail.value,
+    fechaNacimiento: elFecha.value,
+    sucursal: elSucursal.value,
+    fechaRegistro: new Date().toISOString()
+  };
+
+  try {
+    const response = await fetch('/.netlify/functions/registrar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      document.getElementById('formCard').style.display = 'none';
+      document.getElementById('successCard').style.display = 'block';
+    } else {
+      alert("Ocurrió un error al procesar el registro.");
     }
-  });
-</script>
+  } catch (err) {
+    console.error("Error al conectar:", err);
+    alert("Error de conexión al servidor.");
+  }
+}</script>
     <script>
         tailwind.config = {
             theme: {
