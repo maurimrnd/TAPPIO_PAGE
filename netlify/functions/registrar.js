@@ -1,45 +1,68 @@
-exports.handler = async (event, context) => {
-  // Solo permitimos peticiones de tipo POST
+const https = require('https');
+const { URL } = require('url');
+
+exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Método no permitido" };
   }
 
-  try {
-    const datosCliente = JSON.parse(event.body);
+  const makeWebhookUrl = process.env.MAKE_WEBHOOK_URL;
 
-    // Leemos la URL secreta de Make desde las variables de entorno de Netlify
-    const makeWebhookUrl = process.env.MAKE_WEBHOOK_URL;
-
-    if (!makeWebhookUrl) {
-      return { 
-        statusCode: 500, 
-        body: JSON.stringify({ error: "La URL de Make no está configurada en el servidor" }) 
-      };
-    }
-
-    // Reenviamos los datos a Make de forma privada
-    const respuestaMake = await fetch(makeWebhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(datosCliente)
-    });
-
-    if (respuestaMake.ok) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ ok: true, mensaje: "Registro exitoso" })
-      };
-    } else {
-      return {
-        statusCode: 502,
-        body: JSON.stringify({ error: "Error al enviar datos a Make" })
-      };
-    }
-
-  } catch (error) {
+  if (!makeWebhookUrl) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Error interno en el servidor" })
+      body: JSON.stringify({ error: "Falta la variable MAKE_WEBHOOK_URL en Netlify" })
     };
   }
+
+  return new Promise((resolve) => {
+    try {
+      const url = new URL(makeWebhookUrl);
+      const postData = event.body;
+
+      const options = {
+        hostname: url.hostname,
+        path: url.pathname + url.search,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(postData)
+        }
+      };
+
+      const req = https.request(options, (res) => {
+        let responseData = '';
+        res.on('data', (chunk) => { responseData += chunk; });
+        res.on('end', () => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve({
+              statusCode: 200,
+              body: JSON.stringify({ ok: true })
+            });
+          } else {
+            resolve({
+              statusCode: res.statusCode,
+              body: JSON.stringify({ error: "Error en Make", detail: responseData })
+            });
+          }
+        });
+      });
+
+      req.on('error', (e) => {
+        resolve({
+          statusCode: 500,
+          body: JSON.stringify({ error: e.message })
+        });
+      });
+
+      req.write(postData);
+      req.end();
+
+    } catch (err) {
+      resolve({
+        statusCode: 500,
+        body: JSON.stringify({ error: err.message })
+      });
+    }
+  });
 };
