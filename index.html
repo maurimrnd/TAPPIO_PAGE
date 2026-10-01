@@ -190,7 +190,62 @@
             const cardHolder = document.getElementById('cardHolderName');
             if (cardHolder) cardHolder.textContent = val.trim() || 'Tu Nombre Aquí';
         }
+        document.addEventListener('DOMContentLoaded', () => {
+    const phoneInput = document.getElementById('phone');
+    const countryCodeSelect = document.getElementById('countryCode');
+    const phoneError = document.getElementById('phoneError');
+    const submitBtn = document.getElementById('submitBtn');
 
+    let debounceTimer = null;
+
+    if (phoneInput) {
+        phoneInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            const rawPhone = phoneInput.value.trim();
+
+            // Si limpia el campo o tiene menos de 6 dígitos, reseteamos el estado
+            if (rawPhone.length < 6) {
+                if (phoneError) {
+                    phoneError.classList.add('hidden');
+                    phoneError.textContent = 'Ingresa un número válido.';
+                }
+                if (submitBtn) submitBtn.disabled = false;
+                return;
+            }
+
+            // Esperar 500ms tras la última tecla presionada
+            debounceTimer = setTimeout(async () => {
+                const fullPhone = `${countryCodeSelect ? countryCodeSelect.value : ''} ${rawPhone}`;
+
+                try {
+                    const response = await fetch('/.netlify/functions/verificar-telefono', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ telefono: fullPhone })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.existe) {
+                        if (phoneError) {
+                            phoneError.textContent = 'Este número de teléfono ya se encuentra registrado.';
+                            phoneError.classList.remove('hidden');
+                        }
+                        if (submitBtn) submitBtn.disabled = true;
+                    } else {
+                        if (phoneError) {
+                            phoneError.classList.add('hidden');
+                            phoneError.textContent = 'Ingresa un número válido.';
+                        }
+                        if (submitBtn) submitBtn.disabled = false;
+                    }
+                } catch (err) {
+                    console.error('Error al verificar teléfono:', err);
+                }
+            }, 500);
+        });
+    }
+});
         async function processRegistration(e) {
             e.preventDefault();
 
